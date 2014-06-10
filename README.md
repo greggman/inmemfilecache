@@ -42,7 +42,7 @@ API
 
 *   `Cache.setCacheLimit`
 
-    Changes the the cache's size limit. If it's over this limit
+    Changes the cache's size limit. If it's over this limit
     things will be removed from the cache until it's under the limit.
 
 *   `Cache.clear`
