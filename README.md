@@ -1,13 +1,13 @@
 inmemfilecache
 ==============
 
-A very simple in memory file cache. It's a drop in replacement
+A very simple in memory file cache for node.js. It's a drop in replacement
 for `fs.readFile` and `fs.readSyncFile`
 
-Files are cached LRU style in memory. by default inmemfilecache
+Files are cached LRU style in memory. By default inmemfilecache
 monitors the folders of files in the cache. If a file changes
 it's removed from the cache. This means you can use it in dev
-environments and not have to diable it while your server is running.
+environments and not have to disable it while your server is running.
 
 Usage
 -----
