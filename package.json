@@ -1,0 +1,27 @@
+{
+  "name": "inmemfilecache",
+  "version": "0.0.1",
+  "description": "A simple in mem file cache. Use instead of fs.readFile",
+  "main": "lib/inmemfilecache.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/greggman/inmemfilecache.git"
+  },
+  "keywords": [
+    "cache",
+    "files",
+    "readFile",
+    "memory"
+  ],
+  "author": "Gregg Tavares",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/greggman/inmemfilecache/issues"
+  },
+  "homepage": "https://github.com/greggman/inmemfilecache",
+  "devDependencies": {},
+  "dependencies": {
+    "debug": "^1.0.1"
+  }
+}
