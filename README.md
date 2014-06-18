@@ -47,5 +47,11 @@ API
 
 *   `Cache.clear`
 
-    clears the cache.
+    clears the cache and all folder trackers.
+
+Notes:
+------
+
+Your app will not exit as along as folders are being tracked. Call `cache.clear` to clear all
+folder trackers.
 
