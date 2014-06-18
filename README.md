@@ -52,6 +52,6 @@ API
 Notes:
 ------
 
-Your app will not exit as along as folders are being tracked. Call `cache.clear` to clear all
+Your  app will not exit as along as folders are being tracked. Call `cache.clear` to clear all
 folder trackers.
 
