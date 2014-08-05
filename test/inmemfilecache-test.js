@@ -30,6 +30,7 @@
  */
 "use strict";
 
+var path = require('path');
 var should = require('should');
 var sinon = require('sinon');
 var Cache = require('../lib/inmemfilecache');
@@ -47,19 +48,29 @@ describe('Cache', function() {
  });
 
  it('#readFileSync', function() {
-   var watcher = { close: function() {} };
+   var watcher1 = { close: function() {} };
+   var watcher2 = { close: function() {} };
    var fs = {
      watch: function() {},
      readFile: function() {},
      readFileSync: function() {},
    };
-   var mockFS = sinon.mock(fs);
-   var mockWatcher = sinon.mock(watcher);
+   var mockFS = {
+     watch: sinon.stub(fs, "watch"),
+     readFile: sinon.stub(fs, "readFile"),
+     readFileSync: sinon.stub(fs, "readFileSync"),
+   };
+   var mockWatcher1 = sinon.mock(watcher1);
+   var mockWatcher2 = sinon.mock(watcher2);
+   var subFileName = path.join("subfolder", "test.txt");
 
-   mockFS.expects("readFileSync").withArgs("test.file", "utf-8").returns("abcef");
-   mockFS.expects("watch").withArgs(".").returns(watcher);
+   mockFS.readFileSync.withArgs("test.file", "utf-8").returns("abcef");
+   mockFS.readFileSync.withArgs(subFileName, "utf-8").returns("ghij");
+   mockFS.watch.withArgs(".").returns(watcher1);
+   mockFS.watch.withArgs("subfolder").returns(watcher2);
 
-   mockWatcher.expects("close").once();
+   mockWatcher1.expects("close").twice();
+   mockWatcher2.expects("close").twice();
 
    var cache = new Cache({fileSystem: fs});
 
@@ -75,6 +86,37 @@ describe('Cache', function() {
    var content = cache.readFileSync("test.file", "utf-8");
    content.should.equal("abcef");
 
+   var content = cache.readFileSync(subFileName, "utf-8");
+   content.should.equal("ghij");
+
+   var info = cache.getInfo();
+   info.cacheSize.should.equal(9);
+   info.numTrackedFolders.should.equal(2);
+
+   mockFS.watch.getCall(0).args[1](null, null);
+   var info = cache.getInfo();
+   info.cacheSize.should.equal(4);
+   info.numTrackedFolders.should.equal(1);
+
+   var content = cache.readFileSync("test.file", "utf-8");
+   content.should.equal("abcef");
+
+   var info = cache.getInfo();
+   info.cacheSize.should.equal(9);
+   info.numTrackedFolders.should.equal(2);
+
+   mockFS.watch.getCall(1).args[1](null, null);
+   var info = cache.getInfo();
+   info.cacheSize.should.equal(5);
+   info.numTrackedFolders.should.equal(1);
+
+   var content = cache.readFileSync(subFileName, "utf-8");
+   content.should.equal("ghij");
+
+   var info = cache.getInfo();
+   info.cacheSize.should.equal(9);
+   info.numTrackedFolders.should.equal(2);
+
    // The watch should be cleared.
    cache.clear();
 
@@ -82,8 +124,8 @@ describe('Cache', function() {
    info.cacheSize.should.equal(0);
    info.numTrackedFolders.should.equal(0);
 
-   mockFS.verify();
-   mockWatcher.verify();
+   mockWatcher1.verify();
+   mockWatcher2.verify();
  });
 
  it('#readFile', function(done) {
