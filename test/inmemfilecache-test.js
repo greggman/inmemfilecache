@@ -65,6 +65,7 @@ describe('Cache', function() {
    var subFileName = path.join("subfolder", "test.txt");
 
    mockFS.readFileSync.withArgs("test.file", "utf-8").returns("abcef");
+   mockFS.readFileSync.withArgs("test.file2", "utf-8").returns("xyz");
    mockFS.readFileSync.withArgs(subFileName, "utf-8").returns("ghij");
    mockFS.watch.withArgs(".").returns(watcher1);
    mockFS.watch.withArgs("subfolder").returns(watcher2);
@@ -93,28 +94,53 @@ describe('Cache', function() {
    info.cacheSize.should.equal(9);
    info.numTrackedFolders.should.equal(2);
 
+   // make it appear the folder has been updated.
    mockFS.watch.getCall(0).args[1](null, null);
+
+   // Files in the folder should be ejected from cache
    var info = cache.getInfo();
    info.cacheSize.should.equal(4);
    info.numTrackedFolders.should.equal(1);
 
+   // Read the file
    var content = cache.readFileSync("test.file", "utf-8");
    content.should.equal("abcef");
 
+   // File should now be in the cache
    var info = cache.getInfo();
    info.cacheSize.should.equal(9);
    info.numTrackedFolders.should.equal(2);
 
+   // make it appear the subfolder is been updated
    mockFS.watch.getCall(1).args[1](null, null);
+
+   // Files in the folder should be ejected from cache
    var info = cache.getInfo();
    info.cacheSize.should.equal(5);
    info.numTrackedFolders.should.equal(1);
 
+   // read fhe file
    var content = cache.readFileSync(subFileName, "utf-8");
    content.should.equal("ghij");
 
+   // it should be in cache.
    var info = cache.getInfo();
    info.cacheSize.should.equal(9);
+   info.numTrackedFolders.should.equal(2);
+
+   var content = cache.readFileSync("test.file2", "utf-8");
+   content.should.equal("xyz");
+
+   var info = cache.getInfo();
+   info.cacheSize.should.equal(12);
+   info.numTrackedFolders.should.equal(2);
+
+   // Make it appear just one file has been updated.
+   mockFS.watch.getCall(2).args[1](null, "test.file");
+
+   // It should be removed from cash.
+   var info = cache.getInfo();
+   info.cacheSize.should.equal(7);
    info.numTrackedFolders.should.equal(2);
 
    // The watch should be cleared.
